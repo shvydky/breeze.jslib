@@ -38,7 +38,7 @@
                 $.ajax({
                     url: this.options.url,
                     data: $.extend({}, this.options.data, {
-                        start: $(plugin.options.dataSelector, plugin.$element).length,
+                        start: $(plugin.options.dataSelector, plugin.$element).length + parseInt(plugin.options.skip),
                         count: count
                     }),
                     type: this.options.method,
@@ -52,13 +52,15 @@
                                 plugin.options.onTotalCountChanged.call(plugin, plugin.$element, totalCount);
                         }
                         
-                        if (plugin.totalCount <= $(plugin.options.dataSelector, plugin.$element).length)
+                        if (plugin.totalCount <= $(plugin.options.dataSelector, plugin.$element).length + plugin.options.skip)
                             plugin.$loading.hide();
                         var force = false;
                         if (plugin.options.onAdded != null)
                             force = plugin.options.onAdded.call(plugin, plugin.$element, plugin.$container, data, xhr);
                         plugin.active = false;
                         if (force || plugin.needMore()) plugin.more(count);
+                    },
+                    complete: function (data, status, xhr) {
                     }
                 });
             }
@@ -98,6 +100,7 @@
         loadingSelector: '.loading',
         loadMoreSelector: '.load-more',
         dataSelector: '.data-container .data-record',
+        skip: 0,
         count: 10,
         autoLoadCount: 0,
         totalHeader: 'X-Total-Count',
