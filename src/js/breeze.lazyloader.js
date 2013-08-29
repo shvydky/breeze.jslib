@@ -7,6 +7,7 @@
         this.$container = options.dataContainer == null ? this.$element : this.$element.find(options.dataContainer);
         this.$loading = this.$element.find(options.loadingSelector);
         this.$loadMore = this.$element.find(options.loadMoreSelector);
+        this.$scrollContainer = options.scrollContainer == null ? $(window) : $(options.scrollContainer);
         this.options = options;
         this.active = false;
         this.init();
@@ -18,7 +19,7 @@
             if (this.$container.length == null) throw "Data container was not found";
             if (this.options.url == null || this.options.url == '')
                 this.options.url = this.$element.data('url');
-            $(window).on('resize scroll', function () {
+            this.$scrollContainer.on('resize scroll', function () {
                 if (plugin.needMore()) plugin.more();
             }).resize();
         },
@@ -52,7 +53,7 @@
                                 plugin.options.onTotalCountChanged.call(plugin, plugin.$element, totalCount);
                         }
                         
-                        if (plugin.totalCount <= $(plugin.options.dataSelector, plugin.$element).length + plugin.options.skip)
+                        if (plugin.totalCount <= $(plugin.options.dataSelector, plugin.$element).length + plugin.options.skip || !data || !data.trim())
                             plugin.$loading.hide();
                         var force = false;
                         if (plugin.options.onAdded != null)
@@ -71,7 +72,8 @@
         },
         needMore: function () {
             var marker = this.$loading;
-            return marker.is(':visible') && $(window).scrollTop() + $(window).height() > marker.offset().top;
+            return marker.is(':visible') && this.$scrollContainer.offset().top + this.$scrollContainer.height() >= marker.offset().top;
+            //return marker.is(':visible') && this.$scrollContainer.scrollTop() + this.$scrollContainer.height() >= marker.offset().top - this.$scrollContainer.offset().top;
                 //&& (this.options.autoLoadCount <=0 || this.options.autoLoadCount > $(this.options.dataSelector, this.$element).length);
         }
 
@@ -96,6 +98,7 @@
     }
 
     $.fn.lazyLoader.defaults = {
+        scrollContainer: null,
         dataContainer: null,
         loadingSelector: '.loading',
         loadMoreSelector: '.load-more',
