@@ -30,7 +30,7 @@
             $(this.options.loadingSelector, this.$element).show();
             this.more(count);
         },
-        more: function (count) {
+        more: function (count, callback) {
             var plugin = this;
             if (typeof count == 'undefined')
                 count = this.options.count;
@@ -53,13 +53,15 @@
                                 plugin.options.onTotalCountChanged.call(plugin, plugin.$element, totalCount);
                         }
                         
-                        if (plugin.totalCount <= $(plugin.options.dataSelector, plugin.$element).length + plugin.options.skip || !data || !data.trim())
+                        if (plugin.totalCount <= $(plugin.options.dataSelector, plugin.$element).length + plugin.options.skip)
                             plugin.$loading.hide();
                         var force = false;
                         if (plugin.options.onAdded != null)
                             force = plugin.options.onAdded.call(plugin, plugin.$element, plugin.$container, data, xhr);
                         plugin.active = false;
                         if (force || plugin.needMore()) plugin.more(count);
+                        if (callback != null)
+                            callback.call(plugin);
                     },
                     complete: function (data, status, xhr) {
                     }
@@ -73,7 +75,7 @@
         needMore: function () {
             var marker = this.$loading;
             return marker.is(':visible') && this.$scrollContainer.offset().top + this.$scrollContainer.height() >= marker.offset().top;
-            //return marker.is(':visible') && this.$scrollContainer.scrollTop() + this.$scrollContainer.height() >= marker.offset().top - this.$scrollContainer.offset().top;
+            //return marker.is(':visible') && $(window).scrollTop() + $(window).height() > marker.offset().top;
                 //&& (this.options.autoLoadCount <=0 || this.options.autoLoadCount > $(this.options.dataSelector, this.$element).length);
         }
 
